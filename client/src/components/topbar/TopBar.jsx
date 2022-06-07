@@ -57,11 +57,6 @@ export default function TopBar() {
                 LOGIN
               </Link>
             </li>
-            <li className="topListItem">
-              <Link className="link" to="/register">
-                REGISTER
-              </Link>
-            </li>
           </ul>
         )}
         <i className="topSearchIcon fas fa-search"></i>
