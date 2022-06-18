@@ -8,6 +8,12 @@ const postRoute = require("./routes/posts");
 const categoryRoute = require("./routes/categories");
 const multer = require("multer");
 const path = require("path");
+const multerS3 = require('multer-s3');
+const aws = require('aws-sdk');
+
+const s3 = new aws.S3();
+
+aws.config.loadFromPath(__dirname + '/s3.json');
 
 dotenv.config();
 app.use(express.json());
@@ -23,16 +29,28 @@ mongoose
   .then(console.log("Connected to MongoDB"))
   .catch((err) => console.log(err));
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "images");
-  },
-  filename: (req, file, cb) => {
-    cb(null, req.body.name);
-  },
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, "images");
+//   },
+//   filename: (req, file, cb) => {
+//     cb(null, req.body.name);
+//   },
+// });
+
+
+const upload = multer({
+  storage: multerS3({
+    s3: s3,
+    bucket: 'jsblog',
+    acl: 'public-read',
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+    key: function (req, file, cb) {
+      cb(null, `${file.originalname}`);
+    },
+  }),
 });
 
-const upload = multer({ storage: storage });
 app.post("/api/upload", upload.single("file"), (req, res) => {
   res.status(200).json("File has been uploaded");
 });
